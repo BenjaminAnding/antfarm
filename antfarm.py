@@ -94,6 +94,7 @@ class Ant:
 	antId = None
 	xPos = None
 	yPos = None
+	age = None
 	tendencies = ['courageous', 'cautious', 'caring']
 	def __init__(self, farm, antId, xPos, yPos):
 		self.tendency = self.tendencies[random.randint(0,2)]
@@ -103,6 +104,7 @@ class Ant:
 		self.isOnFood = None
 		self.xPos = int(xPos)
 		self.yPos = int(yPos)
+		self.age = 0
 
 	def getAntId(self):
 		return self.antId
@@ -150,10 +152,10 @@ class Ant:
 		else:
 			self.tendency = self.tendencies[challenger]
 
-	def move_cautious(self):
+	def move_courageous(self):
 		self.move(self.senseDir()[0])
 
-	def move_curious(self):
+	def move_cautious(self):
 		self.move(self.senseDir()[1])
 
 	def move_caring(self):
@@ -166,7 +168,7 @@ class Ant:
 				neighbors += 1
 		return neighbors < 2
 
-	def curious_sanity(self):
+	def courageous_sanity(self):
 		neighbors = 0
 		for direction in self.dirmap:
 			if 'ant' in self.home.getCell((self.getXPos()+self.dirmap[direction][0])%self.home.xDim, (self.getYPos()+self.dirmap[direction][1])%self.home.yDim).getContents():
@@ -180,16 +182,29 @@ class Ant:
 				neighbors += 1
 		return neighbors < 3
 
+	def eureka(self):
+		return 1
+	
+	def oof(self):
+		return -1
 
 	def live(self):
-		self.mood()
+		self.age += 1
+		if self.age in [x for x in range(2, 20) if all(x % y != 0 for y in range(2, x))]:
+			self.mood()
 		getattr(self, self.tendency+'_sanity')()	
 		self.home.getCell(self.getXPos(), self.getYPos()).incPosChem(.1)
 		if ((random.randint(0,99) % 3) == 0):
 			getattr(self, 'move_'+self.tendency)()
 		else:
 			self.mover()
-
+		if self.age + random.randint(0,1) == 30:
+			return self.eureka()
+		if self.age >= 30:
+			if random.randint(0,99) % 13 == 0:
+				return self.oof()
+		return 0
+		
 	def toString(self):
 		return self.tendency+' Ant:'+str(self.antId)+' at '+str(self.xPos)+','+str(self.yPos)
 
@@ -223,10 +238,24 @@ class Shell:
 
 	def simLife(self):
 		self.depopulate()
+		spawnstrings = []
+		obituaries = []
 		for ant in self.ants:
 			if ant != 0:
 				#self.ants[ant].mover()
-				self.ants[ant].live()
+				rbat = self.ants[ant].live()
+				if rbat > 0:
+					spawnstrings.append(str(self.ants[ant].getXPos())+' '+str(self.ants[ant].getYPos()))
+				elif rbat < 0:
+					obituaries.append(str(ant))
+		for baby_ant in spawnstrings:
+			self.populate()
+			self.spawn(baby_ant)
+			self.depopulate()
+		for deceased in obituaries:
+			self.populate()
+			self.kill(deceased)
+			self.depopulate()
 		self.populate()
 		os.system('clear')
 		self.draw()
