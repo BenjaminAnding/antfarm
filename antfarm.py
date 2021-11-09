@@ -248,14 +248,14 @@ class Shell:
 					spawnstrings.append(str(self.ants[ant].getXPos())+' '+str(self.ants[ant].getYPos()))
 				elif rbat < 0:
 					obituaries.append(str(ant))
+		self.populate()
 		for baby_ant in spawnstrings:
-			self.populate()
 			self.spawn(baby_ant)
-			self.depopulate()
+		self.depopulate()
+		self.populate()
 		for deceased in obituaries:
-			self.populate()
 			self.kill(deceased)
-			self.depopulate()
+		self.depopulate()
 		self.populate()
 		os.system('clear')
 		self.draw()
