@@ -3,7 +3,7 @@ import time
 import os
 import subprocess
 
-redist = False
+redist = True
 global_subprocesses = []
 
 class Cell:
