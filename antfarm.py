@@ -345,7 +345,7 @@ class Shell:
 		time.sleep(0.18)
 
 	def ZZ(self, args):
-		while len(self.ants) not in [42, 0]:
+		while len(self.ants) not in [42, 1]:
 			getattr(self, 'sim')([])
 			getattr(self, 'cull')([])
 		
